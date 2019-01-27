@@ -1,9 +1,11 @@
 module Main where
 
-import Prelude
-import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Console (CONSOLE, log)
+import Prelude (Unit, (<>))
+import Effect.Console (log)
+import Effect (Effect)
 
-main :: forall e. Eff (console :: CONSOLE | e) Unit
-main = do
-  log "Hello sailor!"
+greet :: String -> String
+greet name = "Hello, " <> name <> "!"
+
+main :: Effect Unit
+main = log (greet "World")
