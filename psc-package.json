@@ -3,13 +3,15 @@
     "set": "psc-0.12.2",
     "source": "https://github.com/purescript/package-sets.git",
     "depends": [
-	    "psci-support",
-	    "arrays",
+        "psci-support",
+        "arrays",
         "console",
         "generics-rep",
         "partial",
         "prelude",
         "random",
-        "spec"
+        "spec",
+        "halogen",
+        "web-events"
     ]
 }
