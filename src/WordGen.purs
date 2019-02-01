@@ -1,23 +1,29 @@
 module WordGen where
 
 import Data.Array (index, length)
-import Data.Maybe (fromJust)
-import Effect
-import Effect.Random
-import Prelude
+import Data.Maybe (Maybe, fromJust)
+import Effect (Effect)
+import Effect.Random (randomInt)
+import Prelude (
+    pure, 
+    ($), 
+    (-), 
+    (<$>), 
+    (<*>)
+)
 import Partial.Unsafe (unsafePartial)
 
 import Dictionary (dictionary)
 import Word (Word, newWord)
 
-mkRandom :: forall a. Array a -> Effect a
-mkRandom d = unsafeIndex d <$> randomInt 0 (length d - 1)
+randomElem :: forall a. Array a -> Effect a
+randomElem es = unsafePartial $ fromJust <$> randomElem'
   where
-    unsafeIndex a = unsafePartial $ fromJust <<< index a
+    randomElem' = index es <$> randomInt 0 (length es - 1)
 
 randomWord :: Effect Word
 randomWord = newWord <$> text <*> speed <*> vOffset
   where
-    text = mkRandom dictionary
+    text = randomElem dictionary
     vOffset = pure 0.0
     speed = pure 0.0

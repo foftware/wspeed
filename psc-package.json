@@ -9,6 +9,7 @@
         "generics-rep",
         "partial",
         "prelude",
-        "random"
+        "random",
+        "spec"
     ]
 }
