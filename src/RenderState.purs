@@ -1,10 +1,12 @@
 module RenderState where
 
-import Data.Array (sortBy, uncons)
+import Control.Applicative (when)
+import Data.Array (sort, uncons)
+import Data.Boolean (otherwise)
 import Data.Eq ((==))
 import Data.Foldable (traverse_, fold)
 import Data.Maybe (Maybe(..))
-import Data.Ord ((<), compare)
+import Data.Ord ((<))
 import Data.Semigroup ((<>))
 import Data.String.CodeUnits (length)
 import Data.Tuple (Tuple(Tuple))
@@ -22,34 +24,28 @@ import Web.Event.EventTarget (addEventListener, eventListener, removeEventListen
 import Web.HTML (window)
 import Web.HTML.HTMLDocument (HTMLDocument, toEventTarget)
 import Web.HTML.Window (document)
-import Web.UIEvent.KeyboardEvent (KeyboardEvent, fromEvent)
+import Web.UIEvent.KeyboardEvent (KeyboardEvent, fromEvent, key)
 import Web.UIEvent.KeyboardEvent.EventTypes (keydown)
+import Word (AbsoluteWord, Word(Word))
 
-
-type StateWord =
-    { text :: String
-    , x :: Int
-    , y :: Int
-    }
 
 type State =
     { writtenText :: String
-    , words :: Array StateWord
+    , words :: Array AbsoluteWord
     }
 
 initialState :: State
 initialState =
     { writtenText: ""
     , words:
-        [ {text: "ahoj", x: 0, y: 0}
-        , {text: "ahoj3", x: 50, y: 0}
-        , {text: "ahoj2", x: 10, y: 10}
+        [ Word {text: "ahoj", hOffset: 0, vOffset: 0, speed: 0}
+        , Word {text: "ahoj3", hOffset: 50, vOffset: 0, speed: 0}
+        , Word {text: "ahoj2", hOffset: 10, vOffset: 10, speed: 0}
         ]
     }
 
 render :: forall p i. State -> HH.HTML p i
 render state =
-
     HH.div_
     [ HH.div
         [ class_ (HH.ClassName "game-div")
@@ -61,17 +57,23 @@ render state =
     , HH.div_ [HH.text state.writtenText]
     ]
   where
-    renderWords (Just {head: w, tail: ws}) (Tuple x y) = if y == w.y
-        then [HH.text (fold $ replicate' (w.x - x) " ")] <> [HH.text w.text] <> renderWords (uncons ws) (Tuple (w.x + length w.text) y)
-        else replicate (w.y - y) HH.br_ <> [HH.text (fold $ replicate' (w.x - x) " ")] <> [HH.text w.text] <> renderWords (uncons ws) (Tuple (w.x + length w.text) w.y)
-    renderWords Nothing (Tuple x y) = [] -- TODO: render the rest
+    ordered :: Array AbsoluteWord
+    ordered = sort state.words
 
-    ordered :: Array StateWord
-    ordered = sortBy sortF state.words
-      where
-        sortF a b = if a.y == b.y
-            then compare a.x b.x
-            else compare a.y b.y
+renderWords
+    :: forall p i
+    .  Maybe {head :: AbsoluteWord, tail :: Array AbsoluteWord}
+    -> Tuple Int Int
+    -> Array (HH.HTML p i)
+renderWords (Just {head: (Word w), tail}) (Tuple x y) = if y == (w.vOffset)
+    then [HH.text (fold $ replicate' (w.hOffset - x) " ")]
+        <> [HH.text w.text]
+        <> renderWords (uncons tail) (Tuple (w.hOffset + length w.text) y)
+    else replicate (w.vOffset - y) HH.br_
+        <> [HH.text (fold $ replicate' (w.hOffset - x) " ")]
+        <> [HH.text w.text]
+        <> renderWords (uncons tail) (Tuple (w.hOffset + length w.text) w.vOffset)
+renderWords Nothing (Tuple x y) = [] -- TODO: render the rest
 
 replicate' :: forall a. Int -> a -> Array a
 replicate' n a = if n < 0
@@ -101,8 +103,7 @@ onTimeout :: Int -> Effect Unit -> Effect Unit
 onTimeout time return = void $ startTimer time return
 
 eval :: Query ~> DSL
-eval = case _ of
-    Init next -> do
+eval (Init next) = do
         document <- H.liftEffect $ document =<< window
         H.subscribe $ eventSource'
             (onKeyPress document)
@@ -110,9 +111,17 @@ eval = case _ of
         H.subscribe $ eventSource_ (onTimeout 100) (Timeout Listening)
         pure next
 
-    HandleKey ev reply -> do
+eval (HandleKey ev reply)
+    | key ev == "Enter" = do
+        -- TODO: Remove word from simulation!!!
         pure $ reply Listening
-    Timeout reply -> do
+    | otherwise = do
+        let char = key ev
+        when (length char == 1) do
+            H.modify_ (\st -> st { writtenText = st.writtenText <> char })
+        pure $ reply Listening
+
+eval (Timeout reply) = do
         log "kwa"
         pure $ reply
 
