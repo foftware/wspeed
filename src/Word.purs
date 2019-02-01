@@ -1,6 +1,6 @@
 module Word 
     ( AbsoluteWord
-    , Word
+    , Word(..)
     , newWord
     )
     where
@@ -20,14 +20,13 @@ instance wordEq :: Eq o => Eq (Word s o) where
     -- Hmmm this is super tricky:
     -- How are two words equal with respect to the rendering grid
     -- whatever it is ?
-    eq (Word w1) (Word w2) = 
+    eq (Word w1) (Word w2) =
         w1.vOffset == w2.vOffset && w1.hOffset == w2.hOffset
 
-instance wordOrd :: Ord o => Ord (Word s o) where
-    compare (Word w1) (Word w2) = compare vOrd hOrd
-      where
-        vOrd = compare w1.vOffset w2.vOffset
-        hOrd = compare w1.hOffset w2.hOffset
+instance wordOrd :: (Eq o, Ord o) => Ord (Word s o) where
+    compare (Word w1) (Word w2) = if w1.vOffset == w2.vOffset
+        then compare w1.hOffset w2.hOffset
+        else compare w1.vOffset w2.vOffset
 
 type AbsoluteWord = Word Int Int
 
