@@ -1,6 +1,12 @@
-module Word where
+module Word 
+    ( AbsoluteWord
+    , Word
+    , newWord
+    )
+    where
 
 import Data.Monoid (class Monoid, mempty)
+
 
 type Word s o = 
     { text :: String

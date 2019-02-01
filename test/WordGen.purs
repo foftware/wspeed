@@ -4,7 +4,9 @@ import Effect.Class (liftEffect)
 import Prelude (Unit, discard, void, ($), (<<<))
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions.Aff (expectError)
+
 import WordGen (randomElem)
+
 
 wordGenSpec :: Spec Unit
 wordGenSpec = do
