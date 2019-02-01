@@ -1,19 +1,20 @@
 module Word where
 
-type Offset = Number
-type Speed = Number
+import Data.Monoid (class Monoid, mempty)
 
-type Word = 
+type Word s o = 
     { text :: String
-    , speed :: Speed
-    , vOffset :: Offset -- <0, 1)
-    , hOffset :: Offset -- <0, 1)
+    , speed :: s
+    , vOffset :: o
+    , hOffset :: o
     }
 
-newWord :: String -> Speed -> Offset -> Word
+type AbsoluteWord = Word Int Int
+
+newWord :: forall s o. Monoid o => Monoid s => String -> s -> o -> Word s o
 newWord text speed vOffset =
     { text: text
-    , speed: speed
+    , speed: mempty
     , vOffset: vOffset
-    , hOffset: 0.0
+    , hOffset: mempty
     }

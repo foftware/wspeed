@@ -2,6 +2,7 @@ module WordGen where
 
 import Data.Array (index, length)
 import Data.Maybe (fromJust)
+import Data.Monoid (class Monoid, mempty)
 import Effect (Effect)
 import Effect.Random (randomInt)
 import Prelude (
@@ -21,9 +22,9 @@ randomElem es = unsafePartial $ fromJust <$> randomElem'
   where
     randomElem' = index es <$> randomInt 0 (length es - 1)
 
-randomWord :: Effect Word
+randomWord :: forall s o. Monoid o => Monoid s => Effect (Word s o)
 randomWord = newWord <$> text <*> speed <*> vOffset
   where
     text = randomElem dictionary
-    vOffset = pure 0.0
-    speed = pure 0.0
+    vOffset = pure mempty
+    speed = pure mempty
