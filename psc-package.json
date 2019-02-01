@@ -12,6 +12,8 @@
         "random",
         "spec",
         "halogen",
-        "web-events"
+        "web-events",
+        "foldable-traversable",
+        "strings"
     ]
 }
