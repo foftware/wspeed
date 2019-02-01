@@ -1,7 +1,9 @@
 module RenderState where
 
+import Data.Array (sortBy)
 import Data.Foldable (traverse_)
 import Data.Maybe (Maybe(..))
+import Data.Ord (compare)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class.Console (log)
@@ -39,21 +41,26 @@ import Web.UIEvent.KeyboardEvent.EventTypes (keydown)
 import Web.UIEvent.KeyboardEvent (KeyboardEvent, fromEvent)
 
 
-data StateWord = StateWord
+type StateWord =
     { text :: String
     , x :: Int
     , y :: Int
     }
 
-data State = State
+type State =
     { writtenText :: String
-    , words :: [
+    , words :: Array StateWord
+    }
 
 initialState :: State
-initialState = State
+initialState =
+    { writtenText: ""
+    , words: []
+    }
 
 render :: forall p i. State -> HH.HTML p i
-render _ =
+render state =
+
     HH.div_
     [ HH.div
         [ class_ (HH.ClassName "game-div")
@@ -62,10 +69,11 @@ render _ =
         , HH.br_
         , HH.text "-------------------------------------"
         ]
-    , HH.div
-        [
-        ]
+--    , HH.div [HH.text state.writtenText]
     ]
+--  where
+--    sortedWords :: Array StateWord
+--    sortedWords = sortBy (\a b -> compare a.x a.y) state.words
 
 onKeyPress
     :: HTMLDocument

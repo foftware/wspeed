@@ -1,7 +1,7 @@
 module WordGen where
 
 import Data.Array (index, length)
-import Data.Maybe (Maybe, fromJust)
+import Data.Maybe (fromJust)
 import Effect (Effect)
 import Effect.Random (randomInt)
 import Prelude (
