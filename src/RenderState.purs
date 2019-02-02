@@ -1,11 +1,11 @@
 module RenderState where
 
 import Control.Applicative (when)
-import Data.Array (cons, sort, uncons, reverse)
+import Data.Array (cons, intercalate, sort, uncons, reverse)
 import Data.Array as A
 import Data.Boolean (otherwise)
 import Data.Eq ((==))
-import Data.Foldable (traverse_, fold, foldr, foldl)
+import Data.Foldable (traverse_, fold, foldl)
 import Data.Function (flip)
 import Data.Functor (map)
 import Data.Maybe (Maybe(..), fromJust)
@@ -65,16 +65,6 @@ render state =
 stringReplicate :: Int -> String -> String
 stringReplicate n w = fold (replicate n w :: Array String)
 
-intersperse :: forall a. a -> Array a -> Array a
-intersperse a array = case uncons array of
-    Just {head: x, tail: xs} -> cons x $ preprendToAll a xs
-    Nothing -> []
-  where
-    preprendToAll :: a -> Array a -> Array a
-    preprendToAll a' = foldr f []
-      where
-        f y b = [a', y] <> b
-
 renderWords
     :: forall p i
     .  Array AbsoluteWord
@@ -123,16 +113,16 @@ initialToListState r =
     }
 
 toHtml :: forall p i. State -> Array (HH.HTML p i)
-toHtml state = intersperse HH.br_ <<< map HH.text $ fillSpace $ reverse
+toHtml state = intersperse HH.br_ <<< map HH.text $ fillSpace state.resolution $ reverse
     (foldl (flip toList) (initialToListState state.resolution)
     $ sort state.words).lines
   where
-    fillSpace :: Array String -> Array String
-    fillSpace xs = (map fillSpace' xs)
-        <> replicate (state.resolution.height - A.length xs)
-            (replicateSpaces state.resolution.width)
+    intersperse a = intercalate [a] <<< map pure
+    fillSpace res xs = (map fillSpace' xs)
+        <> replicate (res.height - A.length xs)
+            (replicateSpaces res.width)
       where
-        fillSpace' x = x <> replicateSpaces (state.resolution.width - length x)
+        fillSpace' x = x <> replicateSpaces (res.width - length x)
 
 toList :: AbsoluteWord -> ToListState -> ToListState
 toList (Word w) state = unsafePartial $ if state.y == w.vOffset
