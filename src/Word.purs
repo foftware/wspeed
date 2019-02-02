@@ -5,7 +5,7 @@ module Word
     )
     where
 
-import Prelude (class Eq, class Ord, (==), (&&), compare) 
+import Prelude (class Eq, class Ord, (==), (&&), compare)
 import Data.Monoid (class Monoid, mempty)
 
 
