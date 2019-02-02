@@ -3,19 +3,19 @@
     "set": "psc-0.12.2",
     "source": "https://github.com/purescript/package-sets.git",
     "depends": [
-        "psci-support",
         "arrays",
         "console",
+        "debug",
+        "foldable-traversable",
         "generics-rep",
+        "halogen",
+        "ordered-collections",
         "partial",
         "prelude",
+        "psci-support",
         "random",
         "spec",
-        "halogen",
-        "web-events",
-        "foldable-traversable",
         "strings",
-        "partial",
-        "debug"
+        "web-events"
     ]
 }
